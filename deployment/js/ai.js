@@ -20,6 +20,7 @@ function init () {
 	var params = {};
 	params.menu = "false";
 	params.scale = "noscale";
+	params.bgcolor = "0x000000";
 
 	var attributes = {};
 	attributes.id = "ai";
