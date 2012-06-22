@@ -6,6 +6,7 @@ package
 	 */
 	
 	import BaseAssets.BaseMain;
+	import com.adobe.serialization.json.JSON;
 	import fl.transitions.Tween;
 	import fl.transitions.TweenEvent;
 	import fl.transitions.easing.*;
@@ -14,6 +15,7 @@ package
 	import flash.display.Sprite;
 	import flash.display.Stage;
 	import flash.events.*;
+	import flash.external.ExternalInterface;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import pipwerks.SCORM
@@ -47,12 +49,11 @@ package
 		private var crono:Cronometer;
 		private var errados:int;
 		private var posSol:Point;
+		private var goalScore:Number = 50;
 		
 		private var glowFilter:GlowFilter = new GlowFilter();
 		private var listSortPeriodos:Array;
 		
-		private var valendoBoolean:Boolean;
-				
 		public function Main()
 		{
 			if (stage) stageDependentInit();
@@ -65,7 +66,8 @@ package
 			
 			boxText.visible = false;
 			telaValendo.visible = false;
-			valendoBoolean = false;
+			
+			createStats();
 			
 			posSol = new Point(sol.x, sol.y);
 			
@@ -108,70 +110,96 @@ package
 			btnProx.addEventListener(MouseEvent.CLICK, reset);
 			valendoNota.addEventListener(MouseEvent.CLICK, openTelaValendo);
 			
-			initLMSConnection();
-			
-			verificaStatus();
+			if (ExternalInterface.available) {
+				initLMSConnection();
+				if (mementoSerialized != null) {
+					if (mementoSerialized != "" && mementoSerialized != "null") {
+						recoverStatus();
+					}
+				}
+			}
 		}
 		
-		private function verificaStatus():void
+		private function createStats():void 
 		{
-			
-			if (completed) {
-				valendoNota.visible = false;
-				valendoBoolean = false;
-			}
-			else {
-				if (lastTimes > 0){
-					valendoNota.visible = false;
-					valendoBoolean = true;
-				}
-				else {
-					valendoNota.visible = true;
-					valendoBoolean = false;
-				}
-			}
+			memento.nTotal = 0;
+			memento.nValendo = 0;
+			memento.nNaoValendo = 0;
+			memento.scoreMin = goalScore;
+			memento.scoreTotal = 0;
+			memento.scoreValendo = 0;
+			memento.valendo = false;
 		}
 		
 		private function conferir(e:MouseEvent):void 
 		{
-			//trace("sorteados: " + listSortPeriodos);
-			//trace("user: " + userResp);
-			trace(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
 			var testador:int = 0;
 			for (var j = 0; j < userResp.length; j++)
 			{
 				for each(var teste in listSortPeriodos)
 				{
-					trace("Compara: " + spritesFake.indexOf(userResp[j]) + " é igual " + planets.indexOf(teste));
-					if (spritesFake.indexOf(userResp[j]) == planets.indexOf(teste)) {testador++; trace("é");}
-					
+					if (spritesFake.indexOf(userResp[j]) == planets.indexOf(teste)) {
+						testador++;
+					}
 				}
 			}
-			if (valendoBoolean) {
+			
+			memento.nTotal++;
+			if (memento.valendo) {
+				memento.nValendo++;
+				
 				if (testador == errados)
 				{
 					acertou.gotoAndPlay(2);
-					lastScore += Math.round(100 / 6);
-					lastTimes += 1;
+					memento.scoreValendo = ((memento.scoreValendo * (memento.nValendo - 1) + 100) / memento.nValendo).toFixed(0);
 				} else {
 					errou.gotoAndPlay(2);
-					lastTimes += 1;
+					memento.scoreValendo = ((memento.scoreValendo * (memento.nValendo - 1) + (testador/errados) * 100) / memento.nValendo).toFixed(0);
 				}
-				save2LMS();
-				if (lastTimes == 6) valendoBoolean = false;
-			}else {
-				if (testador == errados) acertou.gotoAndPlay(2);
-				else errou.gotoAndPlay(2);
+			}else memento.nNaoValendo++;
+				
+			if (testador == errados) {
+				acertou.gotoAndPlay(2);
+				memento.scoreTotal = ((memento.scoreTotal * (memento.nTotal - 1) + 100) / memento.nTotal).toFixed(0);
 			}
+			else {
+				errou.gotoAndPlay(2);
+				memento.scoreTotal = ((memento.scoreTotal * (memento.nTotal - 1) + (testador/errados) * 100) / memento.nTotal).toFixed(0);
+			}
+			
+			score = memento.scoreValendo;
+			
 			unlock(btnProx);
 			unlock(botoes.resetButton);
 			lock(validar);
+			
 			for (var i = 0; i < numPlanets; i++)
 			{
-				if(spritesFake[i].hasEventListener(MouseEvent.MOUSE_OVER)) spritesFake[i].removeEventListener(MouseEvent.MOUSE_OVER, overLine);
-				if(spritesFake[i].hasEventListener(MouseEvent.MOUSE_OUT)) spritesFake[i].removeEventListener(MouseEvent.MOUSE_OUT, outLine);
+				if (spritesFake[i].hasEventListener(MouseEvent.MOUSE_OVER)) spritesFake[i].removeEventListener(MouseEvent.MOUSE_OVER, overLine);
+				if (spritesFake[i].hasEventListener(MouseEvent.MOUSE_OUT)) spritesFake[i].removeEventListener(MouseEvent.MOUSE_OUT, outLine);
 				if (spritesFake[i].hasEventListener(MouseEvent.CLICK)) spritesFake[i].removeEventListener(MouseEvent.CLICK, clickLine);
 			}
+			
+			saveStatus();
+		}
+		
+		private function saveStatusForRecovery():void 
+		{
+			mementoSerialized = JSON.encode(memento);
+		}
+		
+		private function recoverStatus():void
+		{
+			memento = JSON.decode(mementoSerialized);
+			if (memento.valendo) {
+				fazExercicioValer(null);
+			}
+		}
+		
+		override protected function openStats(e:MouseEvent):void 
+		{
+			statsScreen.updateStatics(memento);
+			super.openStats(e);
 		}
 		
 		private function enterFrameFunction(e:Event):void 
@@ -197,7 +225,7 @@ package
 		{
 			fechaJanela(null);
 			
-			valendoBoolean = true;
+			memento.valendo = true;
 			lock(valendoNota);
 			telaValendo.okBtn.removeEventListener(MouseEvent.CLICK, fazExercicioValer);
 			telaValendo.cancelBtn.removeEventListener(MouseEvent.CLICK, fechaJanela);
@@ -543,24 +571,18 @@ package
 		}
 		
 		
-		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
-		
-		/* SCORM */
+		/*------------------------------------------------------------------------------------------------*/
+		//SCORM:
 		
 		private const PING_INTERVAL:Number = 5 * 60 * 1000; // 5 minutos
-		
-		//SCORM VARIABLES
 		private var completed:Boolean;
 		private var scorm:SCORM;
-		private var scormTimeTry:String;
+		private var scormExercise:int;
 		private var connected:Boolean;
-		private var score:int;
+		private var score:int = 0;
 		private var pingTimer:Timer;
-		private var lastTimes:int = 0;//quantas vezes ele ja fez
-		private var lastScore:int = 0;//pontuação anterior
-		private var maxTimes:int = 6;
-		private var respondido:Boolean;
-		
+		private var mementoSerialized:String = "";
+		private var memento:Object = { };
 		
 		/**
 		 * @private
@@ -568,74 +590,57 @@ package
 		 */
 		private function initLMSConnection () : void
 		{
-			
 			completed = false;
 			connected = false;
-			
 			scorm = new SCORM();
-
+			
+			pingTimer = new Timer(PING_INTERVAL);
+			pingTimer.addEventListener(TimerEvent.TIMER, pingLMS);
+			
 			connected = scorm.connect();
 			
 			if (connected) {
- 
+				
+				if (scorm.get("cmi.mode" != "normal")) return;
+				
+				scorm.set("cmi.exit", "suspend");
 				// Verifica se a AI já foi concluída.
 				var status:String = scorm.get("cmi.completion_status");	
+				mementoSerialized = scorm.get("cmi.suspend_data");
+				var stringScore:String = scorm.get("cmi.score.raw");
 				
 				switch(status)
 				{
-					// Primeiro acesso à AI// Continuando a AI...
+					// Primeiro acesso à AI
 					case "not attempted":
 					case "unknown":
 					default:
 						completed = false;
-						scormTimeTry = "times=0,points=0";
-						score = 0;
 						break;
 					
+					// Continuando a AI...
 					case "incomplete":
 						completed = false;
-						scormTimeTry = scorm.get("cmi.location");
-						score = 0;
 						break;
-						
+					
 					// A AI já foi completada.
-					case "completed"://Apartir desse momento os pontos nao serão mais acumulados
+					case "completed":
 						completed = true;
-						scormTimeTry = scorm.get("cmi.location");//Deve contar a quantidade de funções que ele fez e tambem média que ele tinha
-						score = 0;
 						//setMessage("ATENÇÃO: esta Atividade Interativa já foi completada. Você pode refazê-la quantas vezes quiser, mas não valerá nota.");
 						break;
 				}
-				//Tratamento do scormTimeTry--------------------------------------------------------------------
-				if (!completed)//Somente se a atividade nao estiver completa
-				{
-					var lista:Array = scormTimeTry.split(",");
-					for(var i = 0; i < lista.length; i++)
-					{
-						if(i == 0)
-						{
-							lastTimes = int(lista[i].substr(lista[i].search("=") + 1));
-							
-						}else if(i == 1)
-						{
-							lastScore = int(lista[i].substr(lista[i].search("=") + 1));
-							
-						}
-					}
-				}
 				
-				//----------------------------------------------------------------------------------------------
+				//unmarshalObjects(mementoSerialized);
+				scormExercise = 1;
+				score = Number(stringScore.replace(",", "."));
+				
 				var success:Boolean = scorm.set("cmi.score.min", "0");
 				if (success) success = scorm.set("cmi.score.max", "100");
 				
 				if (success)
 				{
 					scorm.save();
-					if (pingTimer == null) {
-						pingTimer = new Timer(PING_INTERVAL);
-						pingTimer.start();
-						pingTimer.addEventListener(TimerEvent.TIMER, pingLMS);
-					}
+					pingTimer.start();
 				}
 				else
 				{
@@ -645,8 +650,10 @@ package
 			}
 			else
 			{
-				//setMessage("Esta Atividade Interativa não está conectada a um LMS: seu aproveitamento nela NÃO será salvo.");
+				trace("Esta Atividade Interativa não está conectada a um LMS: seu aproveitamento nela NÃO será salvo.");
+				mementoSerialized = ExternalInterface.call("getLocalStorageString");
 			}
+			
 			//reset();
 		}
 		
@@ -654,20 +661,29 @@ package
 		 * @private
 		 * Salva cmi.score.raw, cmi.location e cmi.completion_status no LMS
 		 */ 
-		private function save2LMS ()
+		private function commit()
 		{
 			if (connected)
 			{
+				if (scorm.get("cmi.mode" != "normal")) return;
+				
 				// Salva no LMS a nota do aluno.
-				lastScore = Math.max(0, Math.min(lastScore, 100));
-				var success:Boolean = scorm.set("cmi.score.raw", (lastScore).toString());
+				var success:Boolean;// = scorm.set("cmi.score.raw", score.toString());
 
 				// Notifica o LMS que esta atividade foi concluída.
 				success = scorm.set("cmi.completion_status", (completed ? "completed" : "incomplete"));
+				
+				//success = scorm.set("cmi.exit", (completed ? "normal" : "suspend"));
+				
+				//Notifica o LMS se o aluno passou ou falhou na atividade, de acordo com a pontuação:
+				success = scorm.set("cmi.success_status", (score > 75 ? "passed" : "failed"));
 
 				// Salva no LMS o exercício que deve ser exibido quando a AI for acessada novamente.
-				scormTimeTry = "times=" + lastTimes + ",points=" + lastScore;
-				success = scorm.set("cmi.location", scormTimeTry);
+				success = scorm.set("cmi.location", scormExercise.toString());
+				
+				// Salva no LMS a string que representa a situação atual da AI para ser recuperada posteriormente.
+				//mementoSerialized = marshalObjects();
+				success = scorm.set("cmi.suspend_data", mementoSerialized.toString());
 
 				if (success)
 				{
@@ -679,6 +695,8 @@ package
 					//setMessage("Falha na conexão com o LMS.");
 					connected = false;
 				}
+			}else { //LocalStorage
+				ExternalInterface.call("save2LS", mementoSerialized);
 			}
 		}
 		
@@ -688,7 +706,25 @@ package
 		 */
 		private function pingLMS (event:TimerEvent)
 		{
-			scorm.get("cmi.completion_status");
+			//scorm.get("cmi.completion_status");
+			//commit();
+			saveStatus();
+		}
+		
+		private function saveStatus(e:Event = null):void
+		{
+			if (ExternalInterface.available) {
+				if (connected) {
+					
+					if (scorm.get("cmi.mode" != "normal")) return;
+					
+					saveStatusForRecovery();
+					commit();
+				}else {//LocalStorage
+					saveStatusForRecovery();
+					ExternalInterface.call("save2LS", mementoSerialized);
+				}
+			}
 		}
 		
 	}
