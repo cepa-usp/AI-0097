@@ -52,6 +52,7 @@ package
 		private var goalScore:Number = 50;
 		
 		private var glowFilter:GlowFilter = new GlowFilter();
+		private var rightFilter:GlowFilter = new GlowFilter();
 		private var listSortPeriodos:Array;
 		
 		public function Main()
@@ -88,6 +89,13 @@ package
 			glowFilter.strength = 2;
 			glowFilter.quality = 1;
 			
+			rightFilter.color = 0x00FF00;
+			rightFilter.blurX = 10;
+			rightFilter.blurY = 10;
+			rightFilter.alpha = 1;
+			rightFilter.strength = 2;
+			rightFilter.quality = 1;
+			
 			planets = new Array();
 			sprites = new Array();
 			spritesFake = new Array();
@@ -100,6 +108,7 @@ package
 				planets[i] = this["planet0" + (i + 1)];
 				addChild(planets[i]);
 				spritesFake[i] = new Sprite();
+				spritesFake[i].name = "orbita" + String(i);
 				addChild(spritesFake[i]);
 			}
 			
@@ -109,6 +118,11 @@ package
 			validar.addEventListener(MouseEvent.CLICK, conferir);
 			btnProx.addEventListener(MouseEvent.CLICK, reset);
 			valendoNota.addEventListener(MouseEvent.CLICK, openTelaValendo);
+			stage.addEventListener(MouseEvent.MOUSE_OVER, setInfo);
+			stage.addEventListener(MouseEvent.MOUSE_OUT, setInfoOut);
+			
+			mostraResp.addEventListener(MouseEvent.CLICK, showAnswer);
+			mostraSel.addEventListener(MouseEvent.CLICK, hideAnswer);
 			
 			if (ExternalInterface.available) {
 				initLMSConnection();
@@ -118,6 +132,79 @@ package
 					}
 				}
 			}
+		}
+		
+		private function setInfo(e:MouseEvent):void 
+		{
+			var name:String = e.target.name;
+			
+			switch (name) {
+				case "valendoNota":
+					infoBar.texto.text = "Faz o exercício valer nota.";
+					break;
+				case "validar":
+					infoBar.texto.text = "Verifica sua resposta.";
+					break;
+				case "btnProx":
+					infoBar.texto.text = "Inicia um novo exercício.";
+					break;
+				case "start_btn":
+					infoBar.texto.text = "Inicia/pausa o cronômetro.";
+					break;
+				case "reset_btn":
+					infoBar.texto.text = "Zera o cronômetro.";
+					break;
+				case "cron":
+					infoBar.texto.text = "Cronômetro.";
+					break;
+				case "time":
+					infoBar.texto.text = "Display do cronômetro.";
+					break;
+				case "orientacoesBtn":
+					infoBar.texto.text = "Orientações do exercício.";
+					break;
+				case "tutorialBtn":
+					infoBar.texto.text = "Inicia tutorial.";
+					break;
+				case "btEstatisticas":
+					infoBar.texto.text = "Estatísticas do exercício.";
+					break;
+				case "creditos":
+					infoBar.texto.text = "Licença e créditos da atividade.";
+					break;
+				case "resetButton":
+					infoBar.texto.text = "Inicia um novo exercício.";
+					break;
+				
+				case "orbita0":
+					infoBar.texto.text = "Órbita de raio " + raios[0].toFixed(2).replace(".", ",") + " km.";
+					break;
+				case "orbita1":
+					infoBar.texto.text = "Órbita de raio " + raios[1].toFixed(2).replace(".", ",") + " km.";
+					break;
+				case "orbita2":
+					infoBar.texto.text = "Órbita de raio " + raios[2].toFixed(2).replace(".", ",") + " km.";
+					break;
+				case "orbita3":
+					infoBar.texto.text = "Órbita de raio " + raios[3].toFixed(2).replace(".", ",") + " km.";
+					break;
+				case "orbita4":
+					infoBar.texto.text = "Órbita de raio " + raios[4].toFixed(2).replace(".", ",") + " km.";
+					break;
+				case "orbita5":
+					infoBar.texto.text = "Órbita de raio " + raios[5].toFixed(2).replace(".", ",") + " km.";
+					break;
+				case "orbita6":
+					infoBar.texto.text = "Órbita de raio " + raios[6].toFixed(2).replace(".", ",") + " km.";
+					break;
+				
+			}
+		}
+		
+		private function setInfoOut(e:MouseEvent):void 
+		{
+			if (errados == 1) infoBar.texto.text = "Selecione " + String(errados) + " planeta que não obedece à terceira lei de Kepler.";
+			else infoBar.texto.text = "Selecione " + String(errados) + " planetas que não obedecem à terceira lei de Kepler.";
 		}
 		
 		private function createStats():void 
@@ -164,7 +251,9 @@ package
 			}
 			else {
 				errou.gotoAndPlay(2);
-				memento.scoreTotal = ((memento.scoreTotal * (memento.nTotal - 1) + (testador/errados) * 100) / memento.nTotal).toFixed(0);
+				memento.scoreTotal = ((memento.scoreTotal * (memento.nTotal - 1) + (testador / errados) * 100) / memento.nTotal).toFixed(0);
+				mostraResp.visible = true;
+				entrada.gotoAndStop(2);
 			}
 			
 			score = memento.scoreValendo;
@@ -181,6 +270,48 @@ package
 			}
 			
 			saveStatus();
+		}
+		
+		private function showAnswer(e:MouseEvent):void
+		{
+			removeFilters();
+			for each (var item:Sprite in listSortPeriodos) 
+			{
+				var planetIndex:int = planets.indexOf(item);
+				sprites[planetIndex].filters = [rightFilter];
+				sprites[planetIndex].graphics.clear();
+				sprites[planetIndex].graphics.lineStyle(2, 0x80FF80, 1);
+				sprites[planetIndex].graphics.drawCircle(posSol.x, posSol.y, raios[planetIndex]);
+			}
+			mostraResp.visible = false;
+			mostraSel.visible = true;
+		}
+		
+		private function removeFilters():void
+		{
+			for each (var item:Sprite in sprites) 
+			{
+				item.filters = [];
+				item.graphics.clear();
+				item.graphics.lineStyle(2, 0xCCCCCC, 0.3);
+				item.graphics.drawCircle(posSol.x, posSol.y, raios[sprites.indexOf(item)]);
+			}
+		}
+		
+		private function hideAnswer(e:MouseEvent):void
+		{
+			removeFilters();
+			for each (var item:Sprite in userResp) 
+			{
+				var planetIndex:int = spritesFake.indexOf(item);
+				sprites[planetIndex].filters = [glowFilter];
+				sprites[planetIndex].graphics.clear();
+				sprites[planetIndex].graphics.lineStyle(2, 0xFFFFFF, 1);
+				sprites[planetIndex].graphics.drawCircle(posSol.x, posSol.y, raios[planetIndex]);
+			}
+			
+			mostraResp.visible = true;
+			mostraSel.visible = false;
 		}
 		
 		private function saveStatusForRecovery():void 
@@ -264,6 +395,10 @@ package
 		
 		private function sortExercice():void
 		{
+			mostraResp.visible = false;
+			mostraSel.visible = false;
+			entrada.gotoAndStop(1);
+			
 			var conta;
 			var listSort;
 			var certos;
@@ -317,10 +452,6 @@ package
 				sprites[planets.indexOf(listSort[k])].visible = true;
 				spritesFake[planets.indexOf(listSort[k])].visible = true;
 			}
-			
-			//boxNum.text = String(errados);
-			if (errados == 1) infoBar.texto.text = "Selecione " + String(errados) + " planeta que não obedece a Lei de Kepler.";
-			else infoBar.texto.text = "Selecione " + String(errados) + " planetas que não obedecem a Lei de Kepler.";
 			
 			listSortPeriodos = sort(errados, listSort);
 			conta = 9 / Math.pow((raios[0]), 3);

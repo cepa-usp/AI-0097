@@ -3,8 +3,10 @@ package
 	import cepa.utils.Cronometer;
 	import flash.display.MovieClip;
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.ui.Keyboard;
 	import flash.utils.Timer;
 	
 	/**
@@ -34,6 +36,15 @@ package
 			
 			this.start_btn.addEventListener(MouseEvent.CLICK, startStopClock);
 			this.reset_btn.addEventListener(MouseEvent.CLICK, resetClock);
+			
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, keyDownListener);
+		}
+		
+		private function keyDownListener(e:KeyboardEvent):void 
+		{
+			if (e.keyCode == Keyboard.SPACE) {
+				startStopClock(null);
+			}
 		}
 		
 		private function atualiza(event:Event):void {
