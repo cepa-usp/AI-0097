@@ -247,6 +247,7 @@ package
 			}else memento.nNaoValendo++;
 			
 			score = int(memento.scoreValendo);
+			if (score > goalScore) completed = true;
 			
 			memento.scoreTotal = ((memento.scoreTotal * (memento.nTotal - 1) + (testador / errados) * 100) / memento.nTotal).toFixed(0);
 			
