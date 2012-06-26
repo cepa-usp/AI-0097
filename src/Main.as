@@ -212,8 +212,8 @@ package
 		
 		private function setInfoOut(e:MouseEvent):void 
 		{
-			if (errados == 1) infoBar.texto.text = "Selecione " + String(errados) + " planeta que não obedece à terceira lei de Kepler.";
-			else infoBar.texto.text = "Selecione " + String(errados) + " planetas que não obedecem à terceira lei de Kepler.";
+			if (errados == 1) infoBar.texto.text = "Selecione o planeta que NÃO obedece à terceira lei de Kepler.";
+			else infoBar.texto.text = "Selecione os " + String(errados) + " planetas que NÃO obedecem à terceira lei de Kepler.";
 		}
 		
 		private function createStats():void 
