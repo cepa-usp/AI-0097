@@ -142,7 +142,7 @@ package
 			
 			switch (name) {
 				case "valendoNota":
-					infoBar.texto.text = "Faz o exercício valer nota.";
+					infoBar.texto.text = "Muda para o modo de avaliação.";
 					break;
 				case "validar":
 					infoBar.texto.text = "Verifica sua resposta.";
@@ -169,10 +169,10 @@ package
 					infoBar.texto.text = "Inicia tutorial.";
 					break;
 				case "btEstatisticas":
-					infoBar.texto.text = "Estatísticas do exercício.";
+					infoBar.texto.text = "Veja seu desempenho.";
 					break;
 				case "creditos":
-					infoBar.texto.text = "Licença e créditos da atividade.";
+					infoBar.texto.text = "Licença e créditos.";
 					break;
 				case "resetButton":
 					infoBar.texto.text = "Inicia um novo exercício.";
@@ -186,25 +186,25 @@ package
 				
 					
 				case "orbita0":
-					infoBar.texto.text = "Órbita de raio " + raios[0].toFixed(2).replace(".", ",") + " km.";
+					infoBar.texto.text = "Órbita de raio " + raios[0] + " km.";
 					break;
 				case "orbita1":
-					infoBar.texto.text = "Órbita de raio " + raios[1].toFixed(2).replace(".", ",") + " km.";
+					infoBar.texto.text = "Órbita de raio " + raios[1] + " km.";
 					break;
 				case "orbita2":
-					infoBar.texto.text = "Órbita de raio " + raios[2].toFixed(2).replace(".", ",") + " km.";
+					infoBar.texto.text = "Órbita de raio " + raios[2] + " km.";
 					break;
 				case "orbita3":
-					infoBar.texto.text = "Órbita de raio " + raios[3].toFixed(2).replace(".", ",") + " km.";
+					infoBar.texto.text = "Órbita de raio " + raios[3] + " km.";
 					break;
 				case "orbita4":
-					infoBar.texto.text = "Órbita de raio " + raios[4].toFixed(2).replace(".", ",") + " km.";
+					infoBar.texto.text = "Órbita de raio " + raios[4] + " km.";
 					break;
 				case "orbita5":
-					infoBar.texto.text = "Órbita de raio " + raios[5].toFixed(2).replace(".", ",") + " km.";
+					infoBar.texto.text = "Órbita de raio " + raios[5] + " km.";
 					break;
 				case "orbita6":
-					infoBar.texto.text = "Órbita de raio " + raios[6].toFixed(2).replace(".", ",") + " km.";
+					infoBar.texto.text = "Órbita de raio " + raios[6] + " km.";
 					break;
 				
 			}
@@ -246,7 +246,7 @@ package
 				memento.scoreValendo = ((memento.scoreValendo * (memento.nValendo - 1) + (testador/errados) * 100) / memento.nValendo).toFixed(0);
 			}else memento.nNaoValendo++;
 			
-			score = memento.scoreValendo;
+			score = int(memento.scoreValendo);
 			
 			memento.scoreTotal = ((memento.scoreTotal * (memento.nTotal - 1) + (testador / errados) * 100) / memento.nTotal).toFixed(0);
 			
@@ -420,7 +420,7 @@ package
 
 			for (var i = 0; i < numPlanets; i++)
 			{
-				raios[i] = 30 + (i * raioMAX/numPlanets);
+				raios[i] = Math.round(30 + (i * raioMAX/numPlanets));
 				
 				sprites[i].graphics.clear();
 				sprites[i].graphics.lineStyle(2, 0xCCCCCC, 0.3);
@@ -651,7 +651,7 @@ package
 			boxText.x = mouseX+5;
 			boxText.y = mouseY-boxText.height-5;
 			boxText.visible = true;
-			boxText.text = raios[spritesFake.indexOf(Sprite(e.target))].toFixed(2).replace(".", ",") + " km";
+			boxText.text = raios[spritesFake.indexOf(Sprite(e.target))] + " km";
 			setChildIndex(boxText, numChildren - 1);
 			stage.addEventListener(MouseEvent.MOUSE_MOVE, movingBox);
 		}
@@ -900,16 +900,16 @@ package
 				if (scorm.get("cmi.mode" != "normal")) return;
 				
 				// Salva no LMS a nota do aluno.
-				var success:Boolean;// = scorm.set("cmi.score.raw", score.toString());
+				var success:Boolean = scorm.set("cmi.score.raw", score.toString());
 
 				// Notifica o LMS que esta atividade foi concluída.
-				success = scorm.set("cmi.completion_status", (completed ? "completed" : "incomplete"));
+				if(scorm.get("cmi.completion_status") != "completed") success = scorm.set("cmi.completion_status", (completed ? "completed" : "incomplete"));
 				
 				//success = scorm.set("cmi.exit", (completed ? "normal" : "suspend"));
 				
 				//Notifica o LMS se o aluno passou ou falhou na atividade, de acordo com a pontuação:
-				success = scorm.set("cmi.success_status", (score > 75 ? "passed" : "failed"));
-
+				if(scorm.get("cmi.success_status") != "passed") success = scorm.set("cmi.success_status", (score > goalScore ? "passed" : "failed"));
+				
 				// Salva no LMS o exercício que deve ser exibido quando a AI for acessada novamente.
 				success = scorm.set("cmi.location", scormExercise.toString());
 				
