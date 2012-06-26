@@ -175,7 +175,14 @@ package
 				case "resetButton":
 					infoBar.texto.text = "Inicia um novo exercício.";
 					break;
+				case "mostraSel":
+					infoBar.texto.text = "Destaca as órbitas selecionadas pelo usuário.";
+					break;
+				case "mostraResp":
+					infoBar.texto.text = "Destaca as órbitas que não obedecem à terceira lei de Kepler.";
+					break;
 				
+					
 				case "orbita0":
 					infoBar.texto.text = "Órbita de raio " + raios[0].toFixed(2).replace(".", ",") + " km.";
 					break;
@@ -234,29 +241,25 @@ package
 			memento.nTotal++;
 			if (memento.valendo) {
 				memento.nValendo++;
-				
-				if (testador == errados)
-				{
-					acertou.gotoAndPlay(2);
-					memento.scoreValendo = ((memento.scoreValendo * (memento.nValendo - 1) + 100) / memento.nValendo).toFixed(0);
-				} else {
-					errou.gotoAndPlay(2);
-					memento.scoreValendo = ((memento.scoreValendo * (memento.nValendo - 1) + (testador/errados) * 100) / memento.nValendo).toFixed(0);
-				}
+				memento.scoreValendo = ((memento.scoreValendo * (memento.nValendo - 1) + (testador/errados) * 100) / memento.nValendo).toFixed(0);
 			}else memento.nNaoValendo++;
-				
-			if (testador == errados) {
-				acertou.gotoAndPlay(2);
-				memento.scoreTotal = ((memento.scoreTotal * (memento.nTotal - 1) + 100) / memento.nTotal).toFixed(0);
-			}
-			else {
-				errou.gotoAndPlay(2);
-				memento.scoreTotal = ((memento.scoreTotal * (memento.nTotal - 1) + (testador / errados) * 100) / memento.nTotal).toFixed(0);
-				mostraResp.visible = true;
-				entrada.gotoAndStop(2);
-			}
 			
 			score = memento.scoreValendo;
+			
+			memento.scoreTotal = ((memento.scoreTotal * (memento.nTotal - 1) + (testador / errados) * 100) / memento.nTotal).toFixed(0);
+			
+			if (testador == errados) {
+				feedbackScreen.setText("Parabéns, você acertou!");
+			}else{
+				mostraResp.visible = true;
+				entrada.gotoAndStop(2);
+				if (testador == 0) {
+					feedbackScreen.setText("Pressione o botão \"Ver resposta\" para visualizar as órbitas que não obedecem à terceira lei de Kepler.");
+				}else {
+					feedbackScreen.setText("Tem alguma coisa errada. Pressione o botão \"Ver resposta\" para visualizar as órbitas que não obedecem à terceira lei de Kepler.");
+				}
+			}
+			setChildIndex(feedbackScreen, numChildren - 1);
 			
 			unlock(btnProx);
 			unlock(botoes.resetButton);
@@ -606,11 +609,14 @@ package
 						break;
 				}
 			}
+			
+			setInfoOut(null);
 		}
 		
 		private function clickLine(e:MouseEvent):void 
 		{
-			if (Sprite(e.target).buttonMode)
+			var index:int = userResp.indexOf(Sprite(e.target));
+			if (index < 0)
 			{
 				sprites[spritesFake.indexOf(Sprite(e.target))].filters = [glowFilter];
 				sprites[spritesFake.indexOf(Sprite(e.target))].graphics.clear();
@@ -618,18 +624,16 @@ package
 				sprites[spritesFake.indexOf(Sprite(e.target))].graphics.drawCircle(posSol.x, posSol.y, raios[spritesFake.indexOf(Sprite(e.target))]);
 				Sprite(e.target).removeEventListener(MouseEvent.MOUSE_OVER, overLine);
 				Sprite(e.target).removeEventListener(MouseEvent.MOUSE_OUT, outLine);
-				Sprite(e.target).buttonMode = false;
 				userResp.push(Sprite(e.target));
 				boxText.visible = false;
-			}else if (!Sprite(e.target).buttonMode) {
-				Sprite(e.target).buttonMode = true;
+			}else{
 				sprites[spritesFake.indexOf(Sprite(e.target))].filters = [];
 				sprites[spritesFake.indexOf(Sprite(e.target))].graphics.clear();
 				sprites[spritesFake.indexOf(Sprite(e.target))].graphics.lineStyle(2, 0xCCCCCC, 0.3);
 				sprites[spritesFake.indexOf(Sprite(e.target))].graphics.drawCircle(posSol.x, posSol.y, raios[spritesFake.indexOf(Sprite(e.target))]);
 				Sprite(e.target).addEventListener(MouseEvent.MOUSE_OVER, overLine);
 				Sprite(e.target).addEventListener(MouseEvent.MOUSE_OUT, outLine);
-				userResp.splice(Sprite(e.target), 1);
+				userResp.splice(index, 1);
 				boxText.visible = false;
 			}
 			enterFrameFunction(null);
