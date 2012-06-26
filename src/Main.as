@@ -132,6 +132,8 @@ package
 					}
 				}
 			}
+			
+			iniciaTutorial();
 		}
 		
 		private function setInfo(e:MouseEvent):void 
@@ -700,9 +702,104 @@ package
 			sortExercice();
 		}
 		
-		override public function iniciaTutorial(e:MouseEvent = null):void
+		
+		
+		//---------------- Tutorial -----------------------
+		
+		private var tutorialExibido:Boolean = false;
+		private var gearPos:Point = new Point();
+		private var balao:CaixaTexto;
+		private var pointsTuto:Array;
+		private var tutoBaloonPos:Array;
+		private var tutoPos:int;
+		private var tutoSequence:Array = ["Este é um sistema solar fictício.", 
+										  "Um ou mais planetas não obedece à terceira lei de Kepler.",
+										  "A quantidade de planetas que não obedece à terceira lei de Kepler será indicado aqui.",
+										  "Utilize o cronômetro para medir o tempo de órbita de cada planeta.",
+										  "Ao passar o mouse sobre uma órbita será mostrado o raio dessa órbita.",
+										  "Com o tempo e o raio, selecione os planetas que não obedecem à terceira lei de Kepler.",
+										  "Pressione quando você estiver pronto(a) para ser avaliado(a).",
+										  "Pressione para fazer o exercício valer nota.",
+										  "Veja aqui o seu desempenho.",
+										  "Pressione para começar um novo exercício.",
+										  "Pressione para exibir/ocultar a resposta."];
+		
+		
+		override public function iniciaTutorial(e:MouseEvent = null):void  
 		{
+			tutoPos = 0;
+			if(balao == null){
+				balao = new CaixaTexto(true);
+				addChild(balao);
+				balao.visible = false;
+				
+				pointsTuto = 	[new Point(sol.x, sol.y),
+								new Point(sol.x, sol.y),
+								new Point(infoBar.x + 50, infoBar.y),
+								new Point(600, 75),
+								new Point(sol.x + raios[2], sol.y),
+								new Point(230, 220),
+								new Point(55, 30),
+								new Point(82, 60),
+								new Point(655, 325),
+								new Point(125, 32),
+								new Point(85, 102)];
+								
+				tutoBaloonPos = [[CaixaTexto.RIGHT, CaixaTexto.CENTER],
+								[CaixaTexto.LEFT, CaixaTexto.CENTER],
+								[CaixaTexto.BOTTON, CaixaTexto.FIRST],
+								[CaixaTexto.RIGHT, CaixaTexto.FIRST],
+								[CaixaTexto.RIGHT, CaixaTexto.CENTER],
+								["", ""],
+								[CaixaTexto.TOP, CaixaTexto.FIRST],
+								[CaixaTexto.TOP, CaixaTexto.FIRST],
+								[CaixaTexto.RIGHT, CaixaTexto.CENTER],
+								[CaixaTexto.TOP, CaixaTexto.FIRST],
+								[CaixaTexto.TOP, CaixaTexto.FIRST]];
+			}
+			balao.removeEventListener(Event.CLOSE, closeBalao);
 			
+			balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+			balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+			balao.addEventListener(Event.CLOSE, closeBalao);
+			balao.visible = true;
+		}
+		
+		private function closeBalao(e:Event):void 
+		{
+			tutoPos++;
+			if (tutoPos >= tutoSequence.length) {
+				balao.removeEventListener(Event.CLOSE, closeBalao);
+				balao.visible = false;
+			}else if (tutoPos == tutoSequence.length - 2 && btnProx.alpha < 1) {
+				balao.removeEventListener(Event.CLOSE, closeBalao);
+				balao.visible = false;
+				feedbackScreen.addEventListener(Event.CLOSE, iniciaSegundoTuto);
+			}else {
+				if (tutoPos == tutoSequence.length - 1) {
+					if (mostraSel.visible || mostraResp.visible) {
+						balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+						balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+					}else {
+						balao.removeEventListener(Event.CLOSE, closeBalao);
+						balao.visible = false;
+					}
+				}else{
+					balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+					balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+				}
+			}
+		}
+		
+		private function iniciaSegundoTuto(e:Event):void 
+		{
+			tutoPos = 9;
+			if(btnProx.alpha == 1){
+				feedbackScreen.removeEventListener(Event.CLOSE, iniciaSegundoTuto);
+				balao.addEventListener(Event.CLOSE, closeBalao);
+				balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+				balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+			}
 		}
 		
 		
