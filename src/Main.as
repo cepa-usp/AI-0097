@@ -715,12 +715,12 @@ package
 		private var tutoPos:int;
 		private var tutoSequence:Array = ["Este é um sistema solar fictício.", 
 										  "Um ou mais planetas não obedece à terceira lei de Kepler.",
-										  "A quantidade de planetas que não obedece à terceira lei de Kepler será indicado aqui.",
-										  "Utilize o cronômetro para medir o tempo de órbita de cada planeta.",
-										  "Ao passar o mouse sobre uma órbita será mostrado o raio dessa órbita.",
-										  "Com o tempo e o raio, selecione os planetas que não obedecem à terceira lei de Kepler.",
-										  "Pressione quando você estiver pronto(a) para ser avaliado(a).",
-										  "Pressione para fazer o exercício valer nota.",
+										  "A quantidade de planetas que não obedecem à terceira lei de Kepler será indicado aqui.",
+										  "Utilize o cronômetro para medir o período de revolução de cada planeta (você pode utilizar a barra de espaço).",
+										  "Passe o mouse sobre uma órbita para ver o raio dela.",
+										  "Utilizando o raio da órbita e o tempo de revolução, identifique o(s) planeta(s) que não obedece(m) à terceria lei de Kepler clicando sobre a órbita dele.",
+										  "Após selecionar o(s) planeta(s), pressione para avaliar sua resposta.",
+										  "Quando você estiver pronto(a) para ser avaliado(a), pressione para mudar para o modo de avaliação.",
 										  "Veja aqui o seu desempenho.",
 										  "Pressione para começar um novo exercício.",
 										  "Pressione para exibir/ocultar a resposta."];
