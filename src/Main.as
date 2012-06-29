@@ -535,7 +535,7 @@ package
 				{
 					case 0: 
 						paramObj.a = 0;
-						twn[0] = new Tween(paramObj, "a", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[0]), 3) * conta * Math.random()*1.5), true);
+						twn[0] = new Tween(paramObj, "a", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[0]), 3) * conta * getRandon() * 1.5), true);
 						if (!twn[0].hasEventListener(TweenEvent.MOTION_CHANGE)) twn[0].addEventListener(TweenEvent.MOTION_CHANGE, 
 						function ():void { 
 							planets[0].x = posSol.x + raios[0]*Math.cos(Math.PI * paramObj.a/180);
@@ -546,7 +546,7 @@ package
 						break;
 					case 1: 
 						paramObj.b = 0;
-						twn[1] = new Tween(paramObj, "b", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[1]), 3) * conta * Math.random()*2), true);
+						twn[1] = new Tween(paramObj, "b", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[1]), 3) * conta * getRandon() * 2), true);
 						if(!twn[1].hasEventListener(TweenEvent.MOTION_CHANGE)) twn[1].addEventListener(TweenEvent.MOTION_CHANGE, 
 						function ():void { 
 							planets[1].x = posSol.x + raios[1]*Math.cos(Math.PI * paramObj.b/180);
@@ -557,7 +557,7 @@ package
 						break;
 					case 2: 
 						paramObj.c = 0;
-						twn[2] = new Tween(paramObj, "c", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[2]), 3) * conta * Math.random()*2.2), true);
+						twn[2] = new Tween(paramObj, "c", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[2]), 3) * conta * getRandon() * 2.2), true);
 						if(!twn[2].hasEventListener(TweenEvent.MOTION_CHANGE)) twn[2].addEventListener(TweenEvent.MOTION_CHANGE, 
 						function ():void { 
 							planets[2].x = posSol.x + raios[2]*Math.cos(Math.PI * paramObj.c/180);
@@ -568,7 +568,7 @@ package
 						break;
 					case 3: 
 						paramObj.d = 0;
-						twn[3] = new Tween(paramObj, "d", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[3]), 3) * conta * Math.random()*2.5), true);
+						twn[3] = new Tween(paramObj, "d", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[3]), 3) * conta * getRandon() * 2.5), true);
 						if(!twn[3].hasEventListener(TweenEvent.MOTION_CHANGE)) twn[3].addEventListener(TweenEvent.MOTION_CHANGE, 
 						function ():void { 
 							planets[3].x = posSol.x + raios[3]*Math.cos(Math.PI * paramObj.d/180);
@@ -579,7 +579,7 @@ package
 						break;
 					case 4: 
 						paramObj.e = 0;
-						twn[4] = new Tween(paramObj, "e", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[4]), 3) * conta * Math.random()*3), true);
+						twn[4] = new Tween(paramObj, "e", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[4]), 3) * conta * getRandon() * 3), true);
 						if(!twn[4].hasEventListener(TweenEvent.MOTION_CHANGE)) twn[4].addEventListener(TweenEvent.MOTION_CHANGE, 
 						function ():void { 
 							planets[4].x = posSol.x + raios[4]*Math.cos(Math.PI * paramObj.e/180);
@@ -590,7 +590,7 @@ package
 						break;
 					case 5: 
 						paramObj.f = 0;
-						twn[5] = new Tween(paramObj, "f", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[5]), 3) * conta * Math.random()*4), true);
+						twn[5] = new Tween(paramObj, "f", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[5]), 3) * conta * getRandon() * 4), true);
 						if(!twn[5].hasEventListener(TweenEvent.MOTION_CHANGE)) twn[5].addEventListener(TweenEvent.MOTION_CHANGE, 
 						function ():void { 
 							planets[5].x = posSol.x + raios[5]*Math.cos(Math.PI * paramObj.f/180);
@@ -601,7 +601,7 @@ package
 						break;
 					case 6: 
 						paramObj.g = 0;
-						twn[6] = new Tween(paramObj, "g", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[6]), 3) * conta * Math.random()*5), true);
+						twn[6] = new Tween(paramObj, "g", None.easeNone, 0, 360*1000, 1000*Math.sqrt(Math.pow((raios[6]), 3) * conta * getRandon() * 5), true);
 						if(!twn[6].hasEventListener(TweenEvent.MOTION_CHANGE)) twn[6].addEventListener(TweenEvent.MOTION_CHANGE, 
 						function ():void { 
 							planets[6].x = posSol.x + raios[6]*Math.cos(Math.PI * paramObj.g/180);
@@ -614,6 +614,15 @@ package
 			}
 			
 			setInfoOut(null);
+		}
+		
+		private function getRandon():Number 
+		{
+			var ret:Number = Math.random();
+			while (ret == 0) {
+				ret = Math.random();
+			}
+			return ret;
 		}
 		
 		private function clickLine(e:MouseEvent):void 
